@@ -1,0 +1,37 @@
+image: node:18
+
+stages:
+  - build
+  - deploy
+
+variables:
+  NEXT_PUBLIC_ENV: production
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - node_modules/
+    - .pnpm-store
+
+build:
+  stage: build
+  script:
+    - corepack enable
+    - pnpm install --frozen-lockfile
+    - pnpm run build
+  artifacts:
+    paths:
+      - out/
+  only:
+    - main
+
+deploy:
+  stage: deploy
+  script:
+    - apt-get update -qy
+    - apt-get install -y lftp
+    - lftp -c "open -u ${CUSTOMER_FTP_USERNAME},${CUSTOMER_FTP_PASSWORD} ${CUSTOMER_FTP_HOST} && mirror -R out/ /public_html --delete"
+  dependencies:
+    - build
+  only:
+    - main

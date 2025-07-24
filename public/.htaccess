@@ -1,0 +1,21 @@
+RewriteEngine On
+RewriteBase /
+
+# Redirige vers le fichier correspondant si l'URL demandée correspond à un fichier existant sans extension
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^\.]+)$ /$1.html [L]
+
+# Ignore les requêtes pour index.html si le fichier existe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^index\.html$ - [L]
+
+# Redirige vers index.html si l'URL demandée ne correspond à aucun fichier existant
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /index.html [L]
+
+# Redirection vers HTTPS si nécessaire
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTPS} !on
+RewriteRule ^(.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
